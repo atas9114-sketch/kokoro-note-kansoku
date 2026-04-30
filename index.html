@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>アナリティクスダッシュボード</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0F7FF;color:#111;font-size:14px;min-height:100vh;}
+.app{padding:.75rem .875rem 3rem;max-width:680px;margin:0 auto;}
+.topbar{background:#fff;border-bottom:.5px solid #B5D4F4;padding:.625rem .875rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:8px;}
+.topbar-title{font-size:15px;font-weight:600;color:#042C53;flex:1;}
+.sbtn{padding:8px 14px;border:.5px solid #85B7EB;border-radius:8px;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap;min-height:38px;touch-action:manipulation;}
+.sbtn-blue{background:#378ADD;color:#fff;border-color:#378ADD;}
+.sbtn-blue:active{background:#185FA5;}
+.save-status{font-size:11px;text-align:center;padding:4px .875rem;min-height:24px;}
+.nav{display:flex;gap:4px;padding:.625rem 0;flex-wrap:wrap;}
+.nb{padding:9px 14px;border:.5px solid #B5D4F4;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#185FA5;min-height:40px;touch-action:manipulation;}
+.nb.active{background:#378ADD;color:#fff;border-color:#378ADD;font-weight:500;}
+.nb:active{opacity:.8;}
+.sec{display:none;}.sec.active{display:block;}
+.ytabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem;}
+.yt{padding:7px 13px;border:.5px solid #B5D4F4;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#378ADD;min-height:36px;touch-action:manipulation;}
+.yt.active{background:#E6F1FB;color:#0C447C;border-color:#85B7EB;font-weight:500;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.met{background:#fff;border-radius:10px;padding:.875rem;border:.5px solid #B5D4F4;box-shadow:0 1px 3px rgba(55,138,221,.07);}
+.ml{font-size:10px;color:#185FA5;margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase;font-weight:500;}
+.mv2{font-size:21px;font-weight:600;color:#042C53;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.ms{font-size:11px;color:#378ADD;margin-top:3px;}
+.mbg{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:4px;font-variant-numeric:tabular-nums;}
+.bup{background:#E1F5EE;color:#0F6E56;}.bdn{background:#FCEBEB;color:#A32D2D;}.bzr{background:#E6F1FB;color:#185FA5;}
+.card{background:#fff;border:.5px solid #B5D4F4;border-radius:12px;padding:.875rem 1rem;margin-bottom:.75rem;box-shadow:0 1px 3px rgba(55,138,221,.07);}
+.ct{font-size:10px;font-weight:600;color:#185FA5;margin-bottom:.875rem;text-transform:uppercase;letter-spacing:.07em;}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:6px;}
+.st{font-size:17px;font-weight:600;color:#042C53;}
+.ai{background:#fff;border:.5px solid #B5D4F4;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(55,138,221,.07);}
+.ah{display:flex;align-items:center;justify-content:space-between;padding:14px;cursor:pointer;user-select:none;min-height:54px;touch-action:manipulation;}
+.ah:active{background:#E6F1FB;}
+.ahl{display:flex;align-items:center;gap:10px;}
+.ad{width:8px;height:8px;border-radius:50%;background:#378ADD;flex-shrink:0;}
+.at2{font-size:14px;font-weight:500;color:#042C53;}
+.as2{font-size:11px;color:#378ADD;margin-top:2px;}
+.aa{font-size:12px;color:#B5D4F4;transition:transform .2s;}
+.aa.open{transform:rotate(90deg);color:#378ADD;}
+.ab{display:none;padding:0 13px 14px;border-top:.5px solid #E6F1FB;}
+.ab.open{display:block;}
+.abi{padding-top:12px;}
+.stabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.stb{padding:7px 12px;border:.5px solid #B5D4F4;border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:#378ADD;min-height:34px;touch-action:manipulation;}
+.stb.active{background:#378ADD;color:#fff;border-color:#378ADD;}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.wg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.mc{border:.5px solid #B5D4F4;border-radius:8px;padding:8px 3px;text-align:center;cursor:pointer;background:#F8FBFF;touch-action:manipulation;}
+.mc:active,.mc.editing{border-color:#378ADD;background:#E6F1FB;}
+.cl{font-size:9px;color:#378ADD;margin-bottom:3px;font-weight:500;}
+.ii{width:100%;border:none;background:transparent;font-size:14px;font-weight:600;text-align:center;color:#042C53;font-family:inherit;outline:none;font-variant-numeric:tabular-nums;}
+.wn{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.wn button{padding:9px 14px;border:.5px solid #B5D4F4;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#378ADD;min-height:40px;touch-action:manipulation;}
+.wn button:active{background:#E6F1FB;}
+.wn span{font-size:11px;color:#378ADD;flex:1;text-align:center;}
+table.rt{width:100%;border-collapse:collapse;font-size:12px;}
+.rt th{padding:7px 6px;font-size:10px;color:#185FA5;font-weight:600;border-bottom:.5px solid #B5D4F4;text-transform:uppercase;text-align:right;}
+.rt th:first-child{text-align:left;}
+.rt td{padding:8px 6px;border-bottom:.5px solid #E6F1FB;text-align:right;font-size:13px;}
+.rt td:first-child{text-align:left;color:#666;}
+.rt td.n{font-variant-numeric:tabular-nums;color:#042C53;font-weight:600;}
+.rt tfoot td{border-top:.5px solid #85B7EB;border-bottom:none;background:#E6F1FB;font-weight:600;color:#042C53;font-variant-numeric:tabular-nums;}
+.lg{display:flex;gap:12px;margin-bottom:10px;font-size:12px;color:#378ADD;}
+.lg span{display:flex;align-items:center;gap:4px;}
+.lg i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.em{color:#85B7EB;font-size:12px;padding:14px 6px;}
+.rk-card{border:.5px solid #B5D4F4;border-radius:10px;margin-bottom:8px;overflow:hidden;background:#fff;}
+.rk-header{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;touch-action:manipulation;}
+.rk-header:active{background:#E6F1FB;}
+.rb{display:inline-flex;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:700;align-items:center;justify-content:center;flex-shrink:0;}
+.r1{background:#378ADD;color:#fff;}.r2{background:#85B7EB;color:#042C53;}.r3{background:#B5D4F4;color:#042C53;}.rn{background:#E6F1FB;color:#185FA5;border:.5px solid #B5D4F4;}
+.sp{display:inline-block;padding:2px 8px;background:#E6F1FB;border:.5px solid #B5D4F4;border-radius:20px;font-size:11px;color:#0C447C;font-variant-numeric:tabular-nums;font-weight:600;}
+.rk-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:.5px solid #E6F1FB;}
+.rk-stat{padding:9px 6px;text-align:center;border-right:.5px solid #E6F1FB;}
+.rk-stat:last-child{border-right:none;}
+.rk-stat-label{font-size:9px;color:#378ADD;text-transform:uppercase;font-weight:500;margin-bottom:3px;}
+.rk-stat-val{font-weight:600;color:#042C53;font-size:14px;font-variant-numeric:tabular-nums;}
+.rk-detail{display:none;border-top:.5px solid #B5D4F4;padding:10px 12px;background:#F0F7FF;}
+table.dl{width:100%;border-collapse:collapse;font-size:11px;}
+.dl th{padding:4px 5px;color:#378ADD;font-weight:600;border-bottom:.5px solid #B5D4F4;font-size:9px;text-transform:uppercase;}
+.dl td{padding:5px;border-bottom:.5px solid #E6F1FB;}
+.dl td.n{font-variant-numeric:tabular-nums;color:#042C53;font-weight:600;text-align:right;}
+.dl tr:last-child td{border-bottom:none;}
+.af{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.af-label{font-size:10px;color:#185FA5;text-transform:uppercase;font-weight:600;letter-spacing:.04em;margin-bottom:2px;}
+.af input{width:100%;font-size:14px;padding:11px 10px;border:.5px solid #B5D4F4;border-radius:8px;background:#F8FBFF;color:#111;font-family:inherit;min-height:44px;}
+.af input:focus{border-color:#378ADD;background:#fff;outline:none;}
+.af-row{display:flex;gap:7px;}
+.af-row input{flex:1;}
+.af button{width:100%;padding:13px;border:none;border-radius:8px;font-size:15px;cursor:pointer;background:#378ADD;color:#fff;font-weight:600;min-height:48px;touch-action:manipulation;}
+.af button:active{background:#185FA5;}
+.entry-card{border:.5px solid #B5D4F4;border-radius:10px;padding:11px 12px;margin-bottom:8px;background:#F8FBFF;}
+.entry-title{font-weight:600;color:#042C53;font-size:13px;margin-bottom:8px;}
+.entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;}
+.entry-field{display:flex;flex-direction:column;gap:3px;}
+.entry-field input{border:.5px solid #B5D4F4;border-radius:7px;padding:8px 9px;font-size:13px;font-family:inherit;background:#fff;color:#111;min-height:38px;}
+.entry-field input:focus{border-color:#378ADD;outline:none;}
+.entry-field input[type=number]{font-variant-numeric:tabular-nums;color:#042C53;font-weight:600;}
+.del-btn{width:100%;padding:9px;border:.5px solid #F5C6C6;border-radius:7px;background:#FCEBEB;color:#A32D2D;font-size:13px;cursor:pointer;min-height:38px;touch-action:manipulation;}
+.del-btn:active{background:#F5C6C6;}
+.cw{position:relative;width:100%;height:165px;}
+.corr-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table.tb{width:100%;border-collapse:collapse;font-size:11px;}
+.tb th{text-align:left;padding:7px 6px;color:#185FA5;font-weight:600;border-bottom:.5px solid #B5D4F4;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+.tb td{padding:8px 6px;border-bottom:.5px solid #E6F1FB;white-space:nowrap;}
+.tb td.n{font-variant-numeric:tabular-nums;color:#042C53;font-weight:600;}
+.loading{position:fixed;inset:0;background:rgba(230,241,251,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;}
+.loading-spinner{width:40px;height:40px;border:3px solid #B5D4F4;border-top-color:#378ADD;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:14px;color:#185FA5;font-weight:500;}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">データを読み込んでいます...</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-title">📊 アナリティクス</div>
+  <button class="sbtn sbtn-blue" onclick="saveData()" id="savebtn">保存</button>
+</div>
+<div class="save-status" id="ss" style="background:#E6F1FB;color:#378ADD;">読み込み中...</div>
+
+<div class="app">
+<div class="nav">
+  <button class="nb active" onclick="S('overview')">概要</button>
+  <button class="nb" onclick="S('note')">note</button>
+  <button class="nb" onclick="S('x')">X</button>
+  <button class="nb" onclick="S('mond')">mond</button>
+  <button class="nb" onclick="S('corr')">考察</button>
+</div>
+
+<!-- 概要 -->
+<div id="sec-overview" class="sec active">
+  <div class="sh"><div class="st">概要</div></div>
+  <div class="ytabs" id="oy"></div>
+  <div class="g2" id="of"></div>
+  <div class="g2" id="or2" style="margin-bottom:1rem;"></div>
+  <div class="card"><div class="ct">noteフォロワー推移</div><div class="cw"><canvas id="cnf"></canvas></div></div>
+  <div class="card"><div class="ct">Xフォロワー推移</div><div class="cw"><canvas id="cxf"></canvas></div></div>
+  <div class="card"><div class="ct">X 月間インプレッション</div><div class="cw"><canvas id="cxi"></canvas></div></div>
+  <div class="card"><div class="ct">note 月別ビュー数</div><div class="cw"><canvas id="cnv"></canvas></div></div>
+</div>
+
+<!-- note -->
+<div id="sec-note" class="sec">
+  <div class="sh"><div class="st">note</div></div>
+  <div class="ytabs" id="ny"></div>
+  <div class="ai" id="a-nf"><div class="ah" onclick="T('a-nf')"><div class="ahl"><div class="ad"></div><div><div class="at2">フォロワー数</div><div class="as2">月別</div></div></div><div class="aa">▶</div></div><div class="ab"><div class="abi"><div class="mg" id="nfg"></div></div></div></div>
+  <div class="ai" id="a-nv">
+    <div class="ah" onclick="T('a-nv')"><div class="ahl"><div class="ad"></div><div><div class="at2">ビュー数</div><div class="as2">月別・週別</div></div></div><div class="aa">▶</div></div>
+    <div class="ab"><div class="abi">
+      <div class="stabs"><button class="stb active" onclick="nvTab('month',this)">月別</button><button class="stb" onclick="nvTab('week',this)">週別</button></div>
+      <div id="nvm"><div class="mg" id="nvmg"></div></div>
+      <div id="nvw" style="display:none;"><div class="wn"><button onclick="nwp(-1)">◀</button><span id="nwr"></span><button onclick="nwp(1)">▶</button></div><div id="nvwg" class="wg"></div></div>
+    </div></div>
+  </div>
+  <div class="ai" id="a-nac"><div class="ah" onclick="T('a-nac')"><div class="ahl"><div class="ad"></div><div><div class="at2">更新記事数</div><div class="as2">月別</div></div></div><div class="aa">▶</div></div><div class="ab"><div class="abi"><div class="mg" id="nacg"></div></div></div></div>
+  <div class="ai" id="a-nr">
+    <div class="ah" onclick="T('a-nr')"><div class="ahl"><div class="ad"></div><div><div class="at2">売り上げ</div><div class="as2">月別・単品・サブスク</div></div></div><div class="aa">▶</div></div>
+    <div class="ab"><div class="abi">
+      <div class="stabs">
+        <button class="stb active" onclick="nrTab('monthly',this)">月別</button>
+        <button class="stb" onclick="nrTab('articles',this)">単品記事</button>
+        <button class="stb" onclick="nrTab('ranking',this)">ランキング</button>
+        <button class="stb" onclick="nrTab('sub',this)">サブスク</button>
+      </div>
+      <div id="nr-monthly"><div class="lg"><span><i style="background:#378ADD;"></i>サブスク</span><span><i style="background:#85B7EB;"></i>単品</span></div><div style="overflow-x:auto;"><table class="rt" id="nrmt"></table></div></div>
+      <div id="nr-articles" style="display:none;"><div id="alw"></div></div>
+      <div id="nr-ranking" style="display:none;"><div id="rkw"></div></div>
+      <div id="nr-sub" style="display:none;"><div style="margin-bottom:12px;"><div class="af-label" style="margin-bottom:6px;">人数</div><div class="mg" id="nscg"></div></div><div><div class="af-label" style="margin-bottom:6px;">売り上げ（円）</div><div class="mg" id="nsrg"></div></div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- X -->
+<div id="sec-x" class="sec">
+  <div class="sh"><div class="st">X (Twitter)</div></div>
+  <div class="ytabs" id="xy"></div>
+  <div class="ai" id="a-xf"><div class="ah" onclick="T('a-xf')"><div class="ahl"><div class="ad"></div><div><div class="at2">フォロワー数</div><div class="as2">月別</div></div></div><div class="aa">▶</div></div><div class="ab"><div class="abi"><div class="mg" id="xfg"></div></div></div></div>
+  <div class="ai" id="a-xi">
+    <div class="ah" onclick="T('a-xi')"><div class="ahl"><div class="ad"></div><div><div class="at2">インプレッション</div><div class="as2">月別・週別</div></div></div><div class="aa">▶</div></div>
+    <div class="ab"><div class="abi">
+      <div class="stabs"><button class="stb active" onclick="xiTab('month',this)">月別</button><button class="stb" onclick="xiTab('week',this)">週別</button></div>
+      <div id="xim2"><div class="mg" id="ximg"></div></div>
+      <div id="xiw" style="display:none;"><div class="wn"><button onclick="xwp(-1)">◀</button><span id="xwr"></span><button onclick="xwp(1)">▶</button></div><div id="xiwg" class="wg"></div></div>
+    </div></div>
+  </div>
+  <div class="ai" id="a-xr"><div class="ah" onclick="T('a-xr')"><div class="ahl"><div class="ad"></div><div><div class="at2">収益</div><div class="as2">2週間ごと</div></div></div><div class="aa">▶</div></div>
+    <div class="ab"><div class="abi">
+      <div id="xrlist"></div>
+      <div class="af" style="margin-top:12px;">
+        <div class="af-label">新しい収益を追加</div>
+        <div class="af-row"><input type="date" id="xrs"/><input type="date" id="xre"/></div>
+        <input type="number" placeholder="収益（円）" id="xra" inputmode="numeric"/>
+        <input type="text" placeholder="メモ（任意）" id="xrm"/>
+        <button onclick="axr()">+ 追加</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- mond -->
+<div id="sec-mond" class="sec">
+  <div class="sh"><div class="st">mond</div></div>
+  <div class="ytabs" id="my"></div>
+  <div class="ai" id="a-mv"><div class="ah" onclick="T('a-mv')"><div class="ahl"><div class="ad"></div><div><div class="at2">ビュー数</div><div class="as2">月別</div></div></div><div class="aa">▶</div></div><div class="ab"><div class="abi"><div class="mg" id="mvg"></div></div></div></div>
+  <div class="ai" id="a-mq"><div class="ah" onclick="T('a-mq')"><div class="ahl"><div class="ad"></div><div><div class="at2">質問数</div><div class="as2">月別</div></div></div><div class="aa">▶</div></div><div class="ab"><div class="abi"><div class="mg" id="mqg"></div></div></div></div>
+  <div class="ai" id="a-mr"><div class="ah" onclick="T('a-mr')"><div class="ahl"><div class="ad"></div><div><div class="at2">収益</div><div class="as2">記録</div></div></div><div class="aa">▶</div></div>
+    <div class="ab"><div class="abi">
+      <div id="mrlist"></div>
+      <div class="af" style="margin-top:12px;">
+        <div class="af-label">新しい収益を追加</div>
+        <input type="date" id="mrd"/>
+        <input type="number" placeholder="収益（円）" id="mra" inputmode="numeric"/>
+        <input type="text" placeholder="メモ（任意）" id="mrm"/>
+        <button onclick="amr()">+ 追加</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- 考察メモ -->
+<div id="sec-corr" class="sec">
+  <div class="sh"><div class="st">考察メモ</div></div>
+  <div class="ytabs" id="cy"></div>
+  <div class="card">
+    <div class="ct">月別サマリー</div>
+    <div class="corr-wrap"><table class="tb" style="min-width:700px;">
+      <thead><tr><th>月</th><th>noteF</th><th>XF</th><th>noteビュー</th><th>記事数</th><th>サブスク</th><th>サブ売上</th><th>単品売上</th><th>合計</th><th>Xインプレ</th><th>mondビュー</th><th>mond質問</th><th>mond収益</th></tr></thead>
+      <tbody id="cb"></tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="ct">メモ</div>
+    <textarea id="mt" style="width:100%;min-height:150px;border:.5px solid #B5D4F4;border-radius:8px;padding:11px;font-size:14px;font-family:inherit;background:#F8FBFF;color:#111;resize:vertical;line-height:1.6;" placeholder="考察・気づきを自由に記録..."></textarea>
+  </div>
+</div>
+</div>
+
+<!-- 非表示フォーム（GASへのPOST用） -->
+<form id="gasForm" method="POST" target="gasFrame" style="display:none;">
+  <input type="hidden" name="data" id="gasData"/>
+</form>
+<iframe id="gasFrame" name="gasFrame" style="display:none;"></iframe>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbxmwVG312457qK9ErhVdaYIz5F9egoqxVA5HOXQB1OVBB7ZEbUa_L-UDCj7R2PUmmaBwA/exec';
+const MO=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const MK=['01','02','03','04','05','06','07','08','09','10','11','12'];
+const BY=[2024,2025,2026,2027];
+
+function blank(){return{note:{followers:{},views:{},viewsWeek:{},subCount:{},subRevenue:{},articles:[],articleCount:{}},x:{followers:{},impMonth:{},impWeek:{},revenue:[]},mond:{views:{},questions:{},revenue:[]},memo:''};}
+let D=blank();
+let oy=new Date().getFullYear(),ny=new Date().getFullYear(),xy=new Date().getFullYear(),my=new Date().getFullYear(),cy=new Date().getFullYear();
+let nwo=0,xwo=0,ch={};
+let saveTimer=null;
+
+function ss2(msg,col,bg){
+  const el=document.getElementById('ss');
+  el.textContent=msg;
+  el.style.color=col||'#378ADD';
+  el.style.background=bg||'#E6F1FB';
+}
+
+/* ────────────────────────────
+   JSONP でデータ読み込み
+──────────────────────────── */
+function loadData(){
+  const cbName='__gasCb_'+Date.now();
+  const script=document.createElement('script');
+  let done=false;
+
+  window[cbName]=function(data){
+    done=true;
+    delete window[cbName];
+    document.head.removeChild(script);
+    if(data&&typeof data==='object'){
+      D=mergeData(data);
+      ss2('読込完了 ✓','#0F6E56','#E1F5EE');
+    }else{
+      ss2('新規データで開始','#378ADD','#E6F1FB');
+    }
+    document.getElementById('loading').style.display='none';
+    renderAll();
+  };
+
+  script.onerror=function(){
+    if(done)return;
+    done=true;
+    delete window[cbName];
+    ss2('読込失敗（オフライン）','#E8A000','#FFF8E6');
+    document.getElementById('loading').style.display='none';
+    renderAll();
+  };
+
+  script.src=GAS_URL+'?callback='+cbName+'&t='+Date.now();
+  document.head.appendChild(script);
+
+  // 8秒タイムアウト
+  setTimeout(function(){
+    if(!done){
+      done=true;
+      if(window[cbName])delete window[cbName];
+      document.getElementById('loading').style.display='none';
+      ss2('読込タイムアウト','#E8A000','#FFF8E6');
+      renderAll();
+    }
+  },8000);
+}
+
+/* ────────────────────────────
+   フォームPOST でデータ保存
+   （iframe ターゲットでCORSを回避）
+──────────────────────────── */
+function saveData(){
+  const ta=document.getElementById('mt');
+  if(ta)D.memo=ta.value;
+
+  const btn=document.getElementById('savebtn');
+  btn.textContent='保存中...';
+  btn.disabled=true;
+  ss2('保存中...','#378ADD','#E6F1FB');
+  clearTimeout(saveTimer);
+
+  // localStorageにバックアップ
+  try{localStorage.setItem('analytics_backup',JSON.stringify(D));}catch(e){}
+
+  // フォームでPOST
+  const form=document.getElementById('gasForm');
+  document.getElementById('gasData').value=JSON.stringify(D);
+  form.action=GAS_URL;
+  form.submit();
+
+  // iframeの完了を待つ（約3秒）
+  setTimeout(function(){
+    const now=new Date();
+    const ts=now.getFullYear()+'/'+
+      String(now.getMonth()+1).padStart(2,'0')+'/'+
+      String(now.getDate()).padStart(2,'0')+' '+
+      String(now.getHours()).padStart(2,'0')+':'+
+      String(now.getMinutes()).padStart(2,'0');
+    ss2('保存済み ✓ — '+ts,'#0F6E56','#E1F5EE');
+    btn.textContent='保存';
+    btn.disabled=false;
+  },3000);
+}
+
+function markDirty(){
+  ss2('未保存の変更あり ＊','#E8A000','#FFF8E6');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveData(),5000);
+}
+
+function mergeData(old){
+  const b=blank();
+  const d={note:Object.assign(b.note,old.note||{}),x:Object.assign(b.x,old.x||{}),mond:Object.assign(b.mond,old.mond||{}),memo:old.memo||''};
+  if(!d.note.articles)d.note.articles=[];
+  d.note.articles.forEach(a=>{if(a.date&&!a.saleDate){a.saleDate=a.date;delete a.date;}if(!a.saleDate)a.saleDate='';if(!a.publishDate)a.publishDate='';if(a.views===undefined)a.views=0;});
+  return d;
+}
+
+function ay(){
+  const s=new Set([...BY]);
+  const fo=o=>Object.keys(o||{}).forEach(k=>{const y=parseInt(k.split('-')[0]);if(!isNaN(y)&&y>2000)s.add(y);});
+  ['note.followers','note.views','note.viewsWeek','note.articleCount','x.followers','x.impMonth','x.impWeek','mond.views','mond.questions'].forEach(p=>{const o=p.split('.').reduce((a,b)=>a&&a[b],D);fo(o);});
+  D.note.articles.forEach(a=>{if(a.saleDate)s.add(parseInt(a.saleDate.split('-')[0]));});
+  D.x.revenue.forEach(r=>{if(r.start)s.add(parseInt(r.start.split('-')[0]));});
+  D.mond.revenue.forEach(r=>{if(r.date)s.add(parseInt(r.date.split('-')[0]));});
+  return Array.from(s).sort();
+}
+function ryt(id,cur,fn){const el=document.getElementById(id);if(!el)return;el.innerHTML=ay().map(y=>`<button class="yt${y===cur?' active':''}" onclick="${fn}(${y})">${y}</button>`).join('');}
+function soy(y){oy=y;ro();}function sny(y){ny=y;rn();}function sxy(y){xy=y;rx();}function smy(y){my=y;rm();}function scy(y){cy=y;rc();}
+
+function S(n){
+  ['overview','note','x','mond','corr'].forEach((s,i)=>{
+    document.querySelectorAll('.nb')[i].classList.toggle('active',s===n);
+    document.getElementById('sec-'+s).classList.toggle('active',s===n);
+  });
+  if(n==='overview')ro();if(n==='note')rn();if(n==='x')rx();if(n==='mond')rm();if(n==='corr')rc();
+}
+function T(id){const el=document.getElementById(id);const b=el.querySelector('.ab');const a=el.querySelector('.aa');const o=b.classList.toggle('open');a.classList.toggle('open',o);}
+
+const ST={nf:()=>D.note.followers,nv:()=>D.note.views,nac:()=>D.note.articleCount,nsc:()=>D.note.subCount,nsr:()=>D.note.subRevenue,xf:()=>D.x.followers,xim:()=>D.x.impMonth,mv:()=>D.mond.views,mq:()=>D.mond.questions};
+
+function mGrid(cid,sk,yr){
+  const el=document.getElementById(cid);if(!el)return;
+  const s=ST[sk]();
+  el.innerHTML=MK.map((m,i)=>{const k=`${yr}-${m}`;const v=s[k]!==undefined?s[k]:'';return`<div class="mc" onclick="this.querySelector('input').focus()"><div class="cl">${MO[i]}</div><input class="ii" value="${v}" onchange="uc(this,'${sk}','${k}')" onfocus="this.parentNode.classList.add('editing')" onblur="this.parentNode.classList.remove('editing')" type="number" min="0" inputmode="numeric"/></div>`;}).join('');
+}
+function uc(inp,sk,k){const v=inp.value===''?'':parseInt(inp.value)||0;ST[sk]()[k]=v;markDirty();}
+
+function gw(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);const w1=new Date(dt.getFullYear(),0,4);return[dt.getFullYear(),1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7)];}
+function gm(y,w){const j=new Date(y,0,4);const dw=(j.getDay()||7);const mm=new Date(j);mm.setDate(j.getDate()-dw+1+(w-1)*7);return mm;}
+function wl(y,w){const m=gm(y,w);const s2=new Date(m);s2.setDate(m.getDate()+6);const f=d=>`${d.getMonth()+1}/${d.getDate()}`;return`${f(m)}〜${f(s2)}`;}
+function gwp(yr,off){const lw=gw(new Date(yr,11,28))[1];const wks=[];for(let w=1;w<=lw;w++)wks.push({yr,w});const st=Math.max(0,Math.min(off*7,wks.length-7));return{wks:wks.slice(st,st+7),total:lw,st};}
+function wGrid(cid,so,yr,off,rid){
+  const el=document.getElementById(cid);if(!el)return;
+  const{wks,total,st}=gwp(yr,off);
+  if(rid){const r=document.getElementById(rid);if(r)r.textContent=`${st+1}〜${Math.min(st+7,total)}週 / 全${total}週`;}
+  el.innerHTML=wks.map(({yr:y,w})=>{const k=`${y}-W${String(w).padStart(2,'0')}`;const v=so[k]!==undefined?so[k]:'';return`<div class="mc" onclick="this.querySelector('input').focus()" style="min-width:0;"><div class="cl" style="font-size:8px;">${wl(y,w)}</div><input class="ii" style="font-size:12px;" value="${v}" onchange="uwc(this,'${cid}','${k}')" onfocus="this.parentNode.classList.add('editing')" onblur="this.parentNode.classList.remove('editing')" type="number" min="0" inputmode="numeric"/></div>`;}).join('');
+}
+function uwc(inp,gid,k){const v=inp.value===''?'':parseInt(inp.value)||0;if(gid==='nvwg')D.note.viewsWeek[k]=v;if(gid==='xiwg')D.x.impWeek[k]=v;markDirty();}
+function nwp(d){const lw=gw(new Date(ny,11,28))[1];nwo=Math.max(0,Math.min(nwo+d,Math.ceil(lw/7)-1));wGrid('nvwg',D.note.viewsWeek,ny,nwo,'nwr');}
+function xwp(d){const lw=gw(new Date(xy,11,28))[1];xwo=Math.max(0,Math.min(xwo+d,Math.ceil(lw/7)-1));wGrid('xiwg',D.x.impWeek,xy,xwo,'xwr');}
+
+function nvTab(t,b){document.querySelectorAll('#a-nv .stb').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('nvm').style.display=t==='month'?'block':'none';document.getElementById('nvw').style.display=t==='week'?'block':'none';if(t==='week')wGrid('nvwg',D.note.viewsWeek,ny,nwo,'nwr');}
+function xiTab(t,b){document.querySelectorAll('#a-xi .stb').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('xim2').style.display=t==='month'?'block':'none';document.getElementById('xiw').style.display=t==='week'?'block':'none';if(t==='week')wGrid('xiwg',D.x.impWeek,xy,xwo,'xwr');}
+function nrTab(t,b){
+  document.querySelectorAll('#a-nr .stb').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  ['monthly','articles','ranking','sub'].forEach(x=>document.getElementById('nr-'+x).style.display=x===t?'block':'none');
+  if(t==='monthly')rnm();if(t==='articles')ral();if(t==='ranking')rrk();
+  if(t==='sub'){mGrid('nscg','nsc',ny);mGrid('nsrg','nsr',ny);}
+}
+
+function gn(o,k){return parseInt(o[k])||0;}
+function lf(o,yr){for(let i=11;i>=0;i--){const v=o[`${yr}-${MK[i]}`];if(v!==undefined&&v!=='')return{v:parseInt(v)||0,m:i};}return{v:0,m:-1};}
+function pf(o,yr,m){if(m<=0){const v=o[`${yr-1}-12`];return v!==undefined&&v!==''?parseInt(v)||0:0;}const v=o[`${yr}-${MK[m-1]}`];return v!==undefined&&v!==''?parseInt(v)||0:0;}
+function dbadge(c,p){if(!c&&c!==0)return'';const d=c-p;if(d>0)return`<div class="mbg bup">+${d.toLocaleString()}</div>`;if(d<0)return`<div class="mbg bdn">${d.toLocaleString()}</div>`;return`<div class="mbg bzr">±0</div>`;}
+
+function rnm(){
+  const tbl=document.getElementById('nrmt');if(!tbl)return;
+  const y=ny;let ts=0,ta=0;
+  const rows=MK.map((m,i)=>{
+    const sub=gn(D.note.subRevenue,`${y}-${m}`);
+    const art=D.note.articles.filter(a=>a.saleDate&&a.saleDate.startsWith(`${y}-${m}`)).reduce((s,a)=>s+(a.revenue||0),0);
+    const tot=sub+art;ts+=sub;ta+=art;
+    const sw=tot>0?Math.round(sub/tot*100):0;
+    const bar=tot>0?`<div style="display:flex;height:3px;border-radius:2px;overflow:hidden;margin-top:3px;"><div style="width:${sw}%;background:#378ADD;"></div><div style="width:${100-sw}%;background:#85B7EB;"></div></div>`:'';
+    return`<tr><td>${MO[i]}</td><td class="n">${sub>0?'¥'+sub.toLocaleString():'—'}</td><td class="n">${art>0?'¥'+art.toLocaleString():'—'}</td><td class="n">${tot>0?'¥'+tot.toLocaleString():'—'}${bar}</td></tr>`;
+  }).join('');
+  tbl.innerHTML=`<thead><tr><th>月</th><th style="text-align:right;">サブスク</th><th style="text-align:right;">単品</th><th style="text-align:right;">合計</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>年間</td><td class="n">${ts>0?'¥'+ts.toLocaleString():'—'}</td><td class="n">${ta>0?'¥'+ta.toLocaleString():'—'}</td><td class="n">${(ts+ta)>0?'¥'+(ts+ta).toLocaleString():'—'}</td></tr></tfoot>`;
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function ral(){
+  const w=document.getElementById('alw');if(!w)return;
+  const arts=D.note.articles.filter(a=>!a.saleDate||a.saleDate.startsWith(ny+''));
+  let h='';
+  if(arts.length){arts.forEach(a=>{
+    const i=D.note.articles.indexOf(a);
+    h+=`<div class="entry-card">
+      <div class="entry-title">${esc(a.title||'（タイトル未入力）')}</div>
+      <div class="entry-grid">
+        <div class="entry-field"><div class="af-label">売上日</div><input value="${a.saleDate||''}" type="date" onchange="D.note.articles[${i}].saleDate=this.value;markDirty();ral();"/></div>
+        <div class="entry-field"><div class="af-label">投稿日</div><input value="${a.publishDate||''}" type="date" onchange="D.note.articles[${i}].publishDate=this.value;markDirty();"/></div>
+      </div>
+      <div class="entry-grid">
+        <div class="entry-field"><div class="af-label">ビュー数</div><input value="${a.views||''}" type="number" inputmode="numeric" placeholder="—" onchange="D.note.articles[${i}].views=parseInt(this.value)||0;markDirty();"/></div>
+        <div class="entry-field"><div class="af-label">価格（円）</div><input value="${a.price||''}" type="number" inputmode="numeric" onchange="D.note.articles[${i}].price=parseInt(this.value)||0;markDirty();"/></div>
+      </div>
+      <div class="entry-field" style="margin-bottom:8px;"><div class="af-label">売上（円）</div><input value="${a.revenue||''}" type="number" inputmode="numeric" onchange="D.note.articles[${i}].revenue=parseInt(this.value)||0;markDirty();"/></div>
+      <div class="entry-field" style="margin-bottom:8px;"><div class="af-label">タイトル編集</div><input value="${esc(a.title||'')}" placeholder="記事タイトル" onchange="D.note.articles[${i}].title=this.value;markDirty();"/></div>
+      <button class="del-btn" onclick="D.note.articles.splice(${i},1);markDirty();ral();rrk();">削除</button>
+    </div>`;
+  });}else{h=`<div class="em">まだ記録がありません</div>`;}
+  h+=`<div class="af" style="margin-top:12px;">
+    <div class="af-label">新しい記事を追加</div>
+    <input type="text" placeholder="記事タイトル（必須）" id="att"/>
+    <div class="af-row"><input type="date" id="asd" placeholder="売上日"/><input type="date" id="apd" placeholder="投稿日"/></div>
+    <div class="af-row">
+      <input type="number" placeholder="ビュー数" id="avw" inputmode="numeric"/>
+      <input type="number" placeholder="価格（円）" id="apr" inputmode="numeric"/>
+      <input type="number" placeholder="売上（円）" id="arv" inputmode="numeric"/>
+    </div>
+    <button onclick="aa()">+ 追加</button>
+  </div>`;
+  w.innerHTML=h;
+}
+function aa(){
+  const t=document.getElementById('att').value.trim();if(!t)return;
+  D.note.articles.push({saleDate:document.getElementById('asd').value,publishDate:document.getElementById('apd').value,title:t,views:parseInt(document.getElementById('avw').value)||0,price:parseInt(document.getElementById('apr').value)||0,revenue:parseInt(document.getElementById('arv').value)||0});
+  markDirty();['att','avw','apr','arv'].forEach(x=>document.getElementById(x).value='');
+  ral();rrk();
+}
+
+function rrk(){
+  const w=document.getElementById('rkw');if(!w)return;
+  const map={};
+  D.note.articles.forEach(a=>{const t=(a.title||'').trim();if(!t)return;if(!map[t])map[t]={title:t,publishDate:a.publishDate||'',sold:0,revenue:0,views:0,logs:[]};map[t].sold++;map[t].revenue+=(a.revenue||0);map[t].views+=(a.views||0);if(!map[t].publishDate&&a.publishDate)map[t].publishDate=a.publishDate;map[t].logs.push(a);});
+  const rk=Object.values(map).sort((a,b)=>b.revenue-a.revenue||b.sold-a.sold);
+  if(!rk.length){w.innerHTML=`<div class="em">まだ記録がありません</div>`;return;}
+  w.innerHTML=rk.map((item,idx)=>{
+    const rn=idx+1;const rc=rn===1?'r1':rn===2?'r2':rn===3?'r3':'rn';const rid=`rd-${idx}`;
+    return`<div class="rk-card">
+      <div class="rk-header" onclick="trd('${rid}',document.getElementById('eb-${idx}'))">
+        <span class="rb ${rc}">${rn}</span>
+        <div style="flex:1;min-width:0;"><div style="font-weight:600;color:#042C53;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.title)}</div><div style="font-size:11px;color:#378ADD;margin-top:2px;">投稿日: ${item.publishDate||'—'}</div></div>
+        <span id="eb-${idx}" style="color:#B5D4F4;font-size:12px;">▶</span>
+      </div>
+      <div class="rk-stats">
+        <div class="rk-stat"><div class="rk-stat-label">売れた数</div><div class="rk-stat-val"><span class="sp">${item.sold}件</span></div></div>
+        <div class="rk-stat"><div class="rk-stat-label">合計ビュー</div><div class="rk-stat-val">${item.views>0?item.views.toLocaleString():'—'}</div></div>
+        <div class="rk-stat"><div class="rk-stat-label">合計売上</div><div class="rk-stat-val">${item.revenue>0?'¥'+item.revenue.toLocaleString():'—'}</div></div>
+      </div>
+      <div id="${rid}" class="rk-detail">
+        <table class="dl"><thead><tr><th>売上日</th><th>投稿日</th><th style="text-align:right;">ビュー</th><th style="text-align:right;">価格</th><th style="text-align:right;">売上</th></tr></thead>
+        <tbody>${item.logs.map(l=>`<tr><td>${l.saleDate||'—'}</td><td>${l.publishDate||'—'}</td><td class="n">${l.views>0?l.views.toLocaleString():'—'}</td><td class="n">${l.price>0?'¥'+l.price.toLocaleString():'—'}</td><td class="n">${l.revenue>0?'¥'+l.revenue.toLocaleString():'—'}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+function trd(rid,btn){const r=document.getElementById(rid);if(!r)return;const o=r.style.display==='none'||r.style.display==='';r.style.display=o?'block':'none';if(btn)btn.textContent=o?'▼':'▶';}
+
+function axr(){D.x.revenue.push({start:document.getElementById('xrs').value,end:document.getElementById('xre').value,amount:parseInt(document.getElementById('xra').value)||0,memo:document.getElementById('xrm').value});markDirty();document.getElementById('xra').value='';document.getElementById('xrm').value='';rxr();}
+function rxr(){
+  const el=document.getElementById('xrlist');if(!el)return;
+  const rows=D.x.revenue.filter(r=>!r.start||r.start.startsWith(xy+''));
+  el.innerHTML=rows.length?rows.map(r=>{const i=D.x.revenue.indexOf(r);return`<div class="entry-card">
+    <div class="entry-grid">
+      <div class="entry-field"><div class="af-label">開始日</div><input value="${r.start||''}" type="date" onchange="D.x.revenue[${i}].start=this.value;markDirty();"/></div>
+      <div class="entry-field"><div class="af-label">終了日</div><input value="${r.end||''}" type="date" onchange="D.x.revenue[${i}].end=this.value;markDirty();"/></div>
+    </div>
+    <div class="entry-grid">
+      <div class="entry-field"><div class="af-label">収益（円）</div><input value="${r.amount||''}" type="number" inputmode="numeric" onchange="D.x.revenue[${i}].amount=parseInt(this.value)||0;markDirty();"/></div>
+      <div class="entry-field"><div class="af-label">メモ</div><input value="${r.memo||''}" placeholder="—" onchange="D.x.revenue[${i}].memo=this.value;markDirty();"/></div>
+    </div>
+    <button class="del-btn" onclick="D.x.revenue.splice(${i},1);markDirty();rxr();">削除</button>
+  </div>`;}).join(''):`<div class="em">まだ収益記録がありません</div>`;
+}
+
+function amr(){D.mond.revenue.push({date:document.getElementById('mrd').value,amount:parseInt(document.getElementById('mra').value)||0,memo:document.getElementById('mrm').value});markDirty();document.getElementById('mra').value='';document.getElementById('mrm').value='';rmr();}
+function rmr(){
+  const el=document.getElementById('mrlist');if(!el)return;
+  const rows=D.mond.revenue.filter(r=>!r.date||r.date.startsWith(my+''));
+  el.innerHTML=rows.length?rows.map(r=>{const i=D.mond.revenue.indexOf(r);return`<div class="entry-card">
+    <div class="entry-grid">
+      <div class="entry-field"><div class="af-label">日付</div><input value="${r.date||''}" type="date" onchange="D.mond.revenue[${i}].date=this.value;markDirty();"/></div>
+      <div class="entry-field"><div class="af-label">収益（円）</div><input value="${r.amount||''}" type="number" inputmode="numeric" onchange="D.mond.revenue[${i}].amount=parseInt(this.value)||0;markDirty();"/></div>
+    </div>
+    <div class="entry-field" style="margin-bottom:8px;"><div class="af-label">メモ</div><input value="${r.memo||''}" placeholder="—" onchange="D.mond.revenue[${i}].memo=this.value;markDirty();"/></div>
+    <button class="del-btn" onclick="D.mond.revenue.splice(${i},1);markDirty();rmr();">削除</button>
+  </div>`;}).join(''):`<div class="em">まだ収益記録がありません</div>`;
+}
+
+function dc(id){if(ch[id]){ch[id].destroy();delete ch[id];}}
+function lc(id,lb,ds){dc(id);const ctx=document.getElementById(id);if(!ctx)return;ch[id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(55,138,221,0.08)'},ticks:{font:{size:9},color:'#378ADD',maxTicksLimit:6}},y:{grid:{color:'rgba(55,138,221,0.08)'},ticks:{font:{size:9},color:'#378ADD'},beginAtZero:true}}}});}
+function bc(id,lb,vs,co){dc(id);const ctx=document.getElementById(id);if(!ctx)return;ch[id]=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{data:vs,backgroundColor:co||'rgba(55,138,221,0.55)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9},color:'#378ADD',maxTicksLimit:6}},y:{grid:{color:'rgba(55,138,221,0.08)'},ticks:{font:{size:9},color:'#378ADD'},beginAtZero:true}}}});}
+
+function ro(){
+  ryt('oy',oy,'soy');const y=oy;
+  const nfi=lf(D.note.followers,y),xfi=lf(D.x.followers,y);
+  const nfp=pf(D.note.followers,y,nfi.m),xfp=pf(D.x.followers,y,xfi.m);
+  const tv=MK.reduce((s,m)=>s+gn(D.note.views,`${y}-${m}`),0);
+  const txi=MK.reduce((s,m)=>s+gn(D.x.impMonth,`${y}-${m}`),0);
+  const ar=D.note.articles.filter(a=>a.saleDate&&a.saleDate.startsWith(y+'')).reduce((s,a)=>s+(a.revenue||0),0);
+  const sr=MK.reduce((s,m)=>s+gn(D.note.subRevenue,`${y}-${m}`),0);
+  const mr=D.mond.revenue.filter(r=>r.date&&r.date.startsWith(y+'')).reduce((s,r)=>s+(r.amount||0),0);
+  document.getElementById('of').innerHTML=`
+    <div class="met"><div class="ml">noteフォロワー</div><div class="mv2">${nfi.v.toLocaleString()}</div>${dbadge(nfi.v,nfp)}<div class="ms">先月比</div></div>
+    <div class="met"><div class="ml">Xフォロワー</div><div class="mv2">${xfi.v.toLocaleString()}</div>${dbadge(xfi.v,xfp)}<div class="ms">先月比</div></div>
+    <div class="met"><div class="ml">noteビュー</div><div class="mv2">${tv.toLocaleString()}</div><div class="ms">${y}年計</div></div>
+    <div class="met"><div class="ml">Xインプレ</div><div class="mv2">${txi.toLocaleString()}</div><div class="ms">${y}年計</div></div>`;
+  document.getElementById('or2').innerHTML=`
+    <div class="met"><div class="ml">サブスク売上</div><div class="mv2">¥${sr.toLocaleString()}</div><div class="ms">${y}年計</div></div>
+    <div class="met"><div class="ml">単品記事売上</div><div class="mv2">¥${ar.toLocaleString()}</div><div class="ms">${y}年計</div></div>
+    <div class="met"><div class="ml">mond収益</div><div class="mv2">¥${mr.toLocaleString()}</div><div class="ms">${y}年計</div></div>`;
+  setTimeout(()=>{
+    lc('cnf',MO,[{data:MK.map(m=>D.note.followers[`${y}-${m}`]||null),borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.08)',tension:.35,fill:true,pointRadius:2,pointBackgroundColor:'#378ADD'}]);
+    lc('cxf',MO,[{data:MK.map(m=>D.x.followers[`${y}-${m}`]||null),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.08)',tension:.35,fill:true,pointRadius:2,pointBackgroundColor:'#185FA5'}]);
+    bc('cxi',MK.map((_,i)=>`${i+1}月`),MK.map(m=>gn(D.x.impMonth,`${y}-${m}`)),'rgba(24,95,165,0.5)');
+    bc('cnv',MK.map((_,i)=>`${i+1}月`),MK.map(m=>gn(D.note.views,`${y}-${m}`)),'rgba(55,138,221,0.55)');
+  },50);
+}
+function rn(){ryt('ny',ny,'sny');mGrid('nfg','nf',ny);mGrid('nvmg','nv',ny);wGrid('nvwg',D.note.viewsWeek,ny,nwo,'nwr');mGrid('nacg','nac',ny);mGrid('nscg','nsc',ny);mGrid('nsrg','nsr',ny);rnm();ral();rrk();}
+function rx(){ryt('xy',xy,'sxy');mGrid('xfg','xf',xy);mGrid('ximg','xim',xy);wGrid('xiwg',D.x.impWeek,xy,xwo,'xwr');rxr();}
+function rm(){ryt('my',my,'smy');mGrid('mvg','mv',my);mGrid('mqg','mq',my);rmr();}
+function rc(){
+  ryt('cy',cy,'scy');const b=document.getElementById('cb');if(!b)return;const y=cy;
+  b.innerHTML=MK.map((m,i)=>{
+    const ar2=D.note.articles.filter(a=>a.saleDate&&a.saleDate.startsWith(`${y}-${m}`)).reduce((s,a)=>s+(a.revenue||0),0);
+    const sr2=gn(D.note.subRevenue,`${y}-${m}`);
+    const mr2=D.mond.revenue.filter(r=>r.date&&r.date.startsWith(`${y}-${m}`)).reduce((s,r)=>s+(r.amount||0),0);
+    const v=k=>{const s=ST[k]()[`${y}-${m}`];return s!==undefined&&s!==''?Number(s).toLocaleString():'—';};
+    const nfc=D.note.followers[`${y}-${m}`],nfp2=m==='01'?D.note.followers[`${y-1}-12`]:D.note.followers[`${y}-${MK[i-1]}`];
+    const xfc=D.x.followers[`${y}-${m}`],xfp2=m==='01'?D.x.followers[`${y-1}-12`]:D.x.followers[`${y}-${MK[i-1]}`];
+    const nd=nfc!==undefined&&nfp2!==undefined?`(${parseInt(nfc)-parseInt(nfp2)>=0?'+':''}${parseInt(nfc)-parseInt(nfp2)})`:'';
+    const xd=xfc!==undefined&&xfp2!==undefined?`(${parseInt(xfc)-parseInt(xfp2)>=0?'+':''}${parseInt(xfc)-parseInt(xfp2)})`:'';
+    return`<tr><td style="font-weight:600;color:#042C53;">${MO[i]}</td><td class="n">${nfc!==undefined&&nfc!==''?Number(nfc).toLocaleString():'—'} <small style="color:${nd.includes('-')?'#A32D2D':'#0F6E56'}">${nd}</small></td><td class="n">${xfc!==undefined&&xfc!==''?Number(xfc).toLocaleString():'—'} <small style="color:${xd.includes('-')?'#A32D2D':'#0F6E56'}">${xd}</small></td><td class="n">${v('nv')}</td><td class="n">${v('nac')}</td><td class="n">${v('nsc')}</td><td class="n">${sr2>0?'¥'+sr2.toLocaleString():'—'}</td><td class="n">${ar2>0?'¥'+ar2.toLocaleString():'—'}</td><td class="n">${sr2+ar2>0?'¥'+(sr2+ar2).toLocaleString():'—'}</td><td class="n">${v('xim')}</td><td class="n">${v('mv')}</td><td class="n">${v('mq')}</td><td class="n">${mr2>0?'¥'+mr2.toLocaleString():'—'}</td></tr>`;
+  }).join('');
+  const ta=document.getElementById('mt');
+  if(ta){ta.value=D.memo||'';ta.oninput=()=>{D.memo=ta.value;markDirty();};}
+}
+function renderAll(){ro();rn();rx();rm();rc();}
+loadData();
+</script>
+</body>
+</html>
